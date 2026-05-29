@@ -10,9 +10,9 @@ const anthropic = new Anthropic({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      message, 
-      inventory, 
+    const {
+      message,
+      inventory,
       recentlyMade = [],
       preferences = {
         bitter: 0.7,
@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
         smoky: 0.5,
         spicy: 0.3,
         strength: 0.7
-      }
+      },
+      conversationHistory = [],
+      recommendedThisSession = [],
+      userName
     } = body;
 
     if (!message) {
@@ -47,14 +50,25 @@ export async function POST(request: NextRequest) {
       makeableRecipes,
       userPreferences: preferences as UserPreferences,
       recentlyMade,
-      currentTime
+      currentTime,
+      conversationHistory,
+      sessionMemory: {
+        recommendedThisSession,
+        feedbackReceived: [],
+        topicsDiscussed: []
+      },
+      userName,
     });
 
     const userContext = buildUserContext(
       message,
       inventory || [],
       makeableRecipes,
-      recentlyMade
+      recentlyMade,
+      preferences as UserPreferences,
+      conversationHistory,
+      recommendedThisSession,
+      userName,
     );
 
     // Call Claude API
